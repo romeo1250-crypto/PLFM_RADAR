@@ -30,7 +30,7 @@ module tb_usb_data_interface;
 
     // FT601 interface
     wire [31:0] ft601_data;
-    wire [1:0]  ft601_be;
+    wire [3:0]  ft601_be;
     wire        ft601_txe_n;
     wire        ft601_rxf_n;
     reg         ft601_txe;
@@ -271,8 +271,8 @@ module tb_usb_data_interface;
         check(ft601_wr_n === 1'b0,
               "Write strobe active during range data");
 
-        check(ft601_be === 2'b11,
-              "Byte enable=11 for range data");
+        check(ft601_be === 4'b1111,
+              "Byte enable=1111 for range data");
 
         // Wait for all 4 range words to complete
         wait_for_state(S_SEND_DOPPLER, 50);
@@ -307,8 +307,8 @@ module tb_usb_data_interface;
 
         check(uut.ft601_data_out[7:0] === 8'hAA,
               "Header byte 0xAA on data bus");
-        check(ft601_be === 2'b01,
-              "Byte enable=01 for header (lower byte only)");
+        check(ft601_be === 4'b0001,
+              "Byte enable=0001 for header (lower byte only)");
         check(ft601_wr_n === 1'b0,
               "Write strobe active during header");
         check(uut.ft601_data_oe === 1'b1,

@@ -35,7 +35,7 @@
 #   1. ADC uses LVDS_25 (2.5V VCCO) instead of LVDS_33 (better signal quality)
 #   2. FT601 USB 3.0 is fully wired (Bank 16) — unwired on upstream board
 #   3. dac_clk output is routed — unconnected on upstream board
-#   4. ft601_be is 4 bits wide for 32-bit FT601 mode (upstream RTL has [1:0])
+#   4. ft601_be is 4 bits wide [3:0] for 32-bit FT601 mode
 #   5. All status/debug outputs have physical pins (Banks 35 + 13)
 # ============================================================================
 
@@ -280,8 +280,6 @@ set_property IOSTANDARD LVCMOS18 [get_ports {stm32_*_1v8}]
 # FT601 is fully wired on the production board.
 # 32-bit data bus + 4-bit byte enable + control signals.
 #
-# NOTE: Current RTL declares ft601_be[1:0]. Production board requires
-# ft601_be[3:0] for 32-bit FT601 mode. RTL update needed.
 
 # --- ft601_clk_in on MRCC (D17) constrained above in CLOCK section ---
 
@@ -330,14 +328,10 @@ set_property SLEW FAST [get_ports {ft601_data[*]}]
 set_property DRIVE 8 [get_ports {ft601_data[*]}]
 
 # FT601 Byte Enable [3:0]
-# NOTE: RTL currently only drives ft601_be[1:0]. Bits [3:2] are allocated
-# for future 32-bit mode but have no driver yet. Constrain only [1:0]
-# to avoid critical warnings; add [3:2] when RTL is updated.
 set_property PACKAGE_PIN C22 [get_ports {ft601_be[0]}]
 set_property PACKAGE_PIN B22 [get_ports {ft601_be[1]}]
-# Reserved for future 4-bit byte enable (uncomment when RTL supports [3:0]):
-# set_property PACKAGE_PIN B21 [get_ports {ft601_be[2]}]
-# set_property PACKAGE_PIN A21 [get_ports {ft601_be[3]}]
+set_property PACKAGE_PIN B21 [get_ports {ft601_be[2]}]
+set_property PACKAGE_PIN A21 [get_ports {ft601_be[3]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {ft601_be[*]}]
 set_property SLEW FAST [get_ports {ft601_be[*]}]
 set_property DRIVE 8 [get_ports {ft601_be[*]}]

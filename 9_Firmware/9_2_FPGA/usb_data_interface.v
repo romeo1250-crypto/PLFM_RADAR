@@ -14,7 +14,7 @@ module usb_data_interface (
     // FT601 Interface (Slave FIFO mode)
     // Data bus
     inout wire [31:0] ft601_data,    // 32-bit bidirectional data bus
-    output reg [1:0] ft601_be,       // Byte enable (for 32-bit mode)
+    output reg [3:0] ft601_be,       // Byte enable (4 lanes for 32-bit mode)
     
     // Control signals
     output reg ft601_txe_n,          // Transmit enable (active low)
@@ -118,7 +118,7 @@ always @(posedge ft601_clk_in or negedge reset_n) begin
         byte_counter <= 0;
         ft601_data_out <= 0;
         ft601_data_oe <= 0;
-        ft601_be <= 2'b11;  // Both bytes enabled for 32-bit mode
+        ft601_be <= 4'b1111;  // All bytes enabled for 32-bit mode
         ft601_txe_n <= 1;
         ft601_rxf_n <= 1;
         ft601_wr_n <= 1;
@@ -142,7 +142,7 @@ always @(posedge ft601_clk_in or negedge reset_n) begin
                 if (!ft601_txe) begin  // FT601 TX FIFO not empty
                     ft601_data_oe <= 1;
                     ft601_data_out <= {24'b0, HEADER};
-                    ft601_be <= 2'b01;  // Only lower byte valid
+                    ft601_be <= 4'b0001;  // Only lower byte valid
                     ft601_wr_n <= 0;     // Assert write strobe
                     current_state <= SEND_RANGE_DATA;
                 end
@@ -151,7 +151,7 @@ always @(posedge ft601_clk_in or negedge reset_n) begin
             SEND_RANGE_DATA: begin
                 if (!ft601_txe) begin
                     ft601_data_oe <= 1;
-                    ft601_be <= 2'b11;  // All bytes valid for 32-bit word
+                    ft601_be <= 4'b1111;  // All bytes valid for 32-bit word
                     
                     case (byte_counter)
                         0: ft601_data_out <= range_profile_cap;
@@ -174,7 +174,7 @@ always @(posedge ft601_clk_in or negedge reset_n) begin
             SEND_DOPPLER_DATA: begin
                 if (!ft601_txe && doppler_valid_ft) begin
                     ft601_data_oe <= 1;
-                    ft601_be <= 2'b11;
+                    ft601_be <= 4'b1111;
                     
                     case (byte_counter)
                         0: ft601_data_out <= {doppler_real_cap, doppler_imag_cap};
@@ -197,7 +197,7 @@ always @(posedge ft601_clk_in or negedge reset_n) begin
             SEND_DETECTION_DATA: begin
                 if (!ft601_txe && cfar_valid_ft) begin
                     ft601_data_oe <= 1;
-                    ft601_be <= 2'b01;
+                    ft601_be <= 4'b0001;
                     ft601_data_out <= {24'b0, 7'b0, cfar_detection_cap};
                     ft601_wr_n <= 0;
                     current_state <= SEND_FOOTER;
@@ -207,7 +207,7 @@ always @(posedge ft601_clk_in or negedge reset_n) begin
             SEND_FOOTER: begin
                 if (!ft601_txe) begin
                     ft601_data_oe <= 1;
-                    ft601_be <= 2'b01;
+                    ft601_be <= 4'b0001;
                     ft601_data_out <= {24'b0, FOOTER};
                     ft601_wr_n <= 0;
                     current_state <= WAIT_ACK;

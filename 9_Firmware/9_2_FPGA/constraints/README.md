@@ -43,7 +43,7 @@ own constraint file. Both files constrain the same RTL top module (`radar_system
 |--------|-------------------|---------------------|
 | FT601 USB | Unwired (chip placed, no nets) | Fully wired, Bank 16 |
 | `dac_clk` | Not connected (DAC clocked by AD9523 directly) | Routed, FPGA drives DAC |
-| `ft601_be` width | `[1:0]` in RTL | `[3:0]` needed (RTL update required) |
+| `ft601_be` width | `[1:0]` in upstream RTL | `[3:0]` (RTL updated) |
 | ADC LVDS standard | LVDS_33 (3.3V bank) | LVDS_25 (2.5V bank, better quality) |
 | Status/debug outputs | No physical pins (commented out) | All routed to Banks 35 + 13 |
 

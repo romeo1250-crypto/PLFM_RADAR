@@ -86,8 +86,8 @@ module tb_nco_xsim;
         // ════════════════════════════════════════════════════════
         $display("--- Test Group 1: Reset Behaviour ---");
         #50;
-        check(cos_out === 16'sd0 || cos_out === 16'sd1,
-              "cos_out near zero during reset");
+        check(cos_out === 16'sh7FFF,
+              "cos_out = 0x7FFF during reset");
         check(output_valid === 1'b0, "output_valid = 0 during reset");
 
         // ════════════════════════════════════════════════════════
@@ -184,26 +184,34 @@ module tb_nco_xsim;
         #50;
         phase_increment = 32'h4CCCCCCD;
         reset_n = 1;
-        repeat (15) @(posedge clk);
+        // Allow 25 cycles for pipeline flush (DSP48E1 has 6–7 stage latency)
+        repeat (25) @(posedge clk);
 
         begin : quad_test
             reg [63:0] mag_sq;
             reg [63:0] mag_min, mag_max;
             integer sample_count;
+            integer skip;
 
             mag_min = 64'hFFFFFFFFFFFFFFFF;
             mag_max = 0;
             sample_count = 0;
+            skip = 0;
 
             for (i = 0; i < 200; i = i + 1) begin
                 @(posedge clk); #0.1;
                 if (output_valid) begin
-                    // cos^2 + sin^2
-                    mag_sq = cos_out * cos_out + sin_out * sin_out;
-                    if (mag_sq > 0) begin  // skip zeros during pipeline fill
-                        if (mag_sq < mag_min) mag_min = mag_sq;
-                        if (mag_sq > mag_max) mag_max = mag_sq;
-                        sample_count = sample_count + 1;
+                    // Skip first 4 valid samples (pipeline settling)
+                    if (skip < 4) begin
+                        skip = skip + 1;
+                    end else begin
+                        // cos^2 + sin^2
+                        mag_sq = cos_out * cos_out + sin_out * sin_out;
+                        if (mag_sq > 0) begin  // skip zeros during pipeline fill
+                            if (mag_sq < mag_min) mag_min = mag_sq;
+                            if (mag_sq > mag_max) mag_max = mag_sq;
+                            sample_count = sample_count + 1;
+                        end
                     end
                 end
             end

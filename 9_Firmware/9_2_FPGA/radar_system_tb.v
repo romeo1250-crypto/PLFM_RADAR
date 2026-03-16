@@ -52,7 +52,7 @@ reg [7:0] adc_d_n;
 
 // FT601 interface
 wire [31:0] ft601_data;
-wire [1:0] ft601_be;
+wire [3:0] ft601_be;
 wire ft601_txe_n;
 wire ft601_rxf_n;
 reg ft601_txe;

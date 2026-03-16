@@ -77,7 +77,7 @@ module radar_system_top (
     
     // Data bus
     inout wire [31:0] ft601_data,         // 32-bit bidirectional data bus
-    output wire [1:0] ft601_be,            // Byte enable
+    output wire [3:0] ft601_be,            // Byte enable (4 lanes for 32-bit mode)
     
     // Control signals
     output wire ft601_txe_n,                // Transmit enable (active low)
