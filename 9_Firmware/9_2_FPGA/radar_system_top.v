@@ -436,8 +436,8 @@ always @(posedge clk_100m_buf or negedge sys_reset_n) begin
         // Simple threshold detection on doppler magnitude
         if (rx_doppler_valid) begin
             // Calculate approximate magnitude (|I| + |Q|)
-            cfar_mag = (rx_doppler_real[15] ? -rx_doppler_real : rx_doppler_real) +
-                       (rx_doppler_imag[15] ? -rx_doppler_imag : rx_doppler_imag);
+            cfar_mag <= (rx_doppler_real[15] ? -rx_doppler_real : rx_doppler_real) +
+                        (rx_doppler_imag[15] ? -rx_doppler_imag : rx_doppler_imag);
             
             // Threshold detection
             if (cfar_mag > 17'd10000) begin
